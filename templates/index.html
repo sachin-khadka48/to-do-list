@@ -271,6 +271,8 @@
             </select>
             <button class="add-btn" type="submit">Add</button>
         </form>
+        <!-- Search bar -->
+        <input class="task-input" type="text" id="search-input" placeholder="Search tasks..." style="margin-bottom:18px; width:100%; background:#fff; color:#222;">
         <div class="filter-row" id="filter-row">
             <button class="filter-btn active" type="button" data-filter="All">All</button>
             <button class="filter-btn" type="button" data-filter="Active">Active</button>
@@ -302,6 +304,8 @@
 
         let currentFilter = "All";
 
+        let searchQuery = "";
+
         function renderTasks() {
             const list = document.getElementById('tasks-list');
             list.innerHTML = '';
@@ -311,7 +315,9 @@
                 if (currentFilter === "Active") return !task.completed;
                 if (currentFilter === "Done") return task.completed;
                 return task.category === currentFilter;
-            });
+            }).filter(task => 
+                task.title.toLowerCase().includes(searchQuery.toLowerCase())
+            );
             filtered.forEach((task, idx) => {
                 if (task.completed) completed++;
                 const li = document.createElement('li');
