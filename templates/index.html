@@ -11,6 +11,9 @@
             margin: 0;
             padding: 0;
         }
+        body.dark-mode {
+            background: #23272e;
+        }
         .header-bar {
             background: #f7c087;
             height: 8px;
@@ -24,6 +27,10 @@
             padding: 32px 32px 24px 32px;
             box-shadow: 0 4px 24px rgba(0,0,0,0.04);
         }
+        .container.dark-mode {
+            background: #23272e;
+            box-shadow: 0 4px 24px rgba(0,0,0,0.4);
+        }
         .title {
             font-size: 2rem;
             font-weight: bold;
@@ -33,6 +40,9 @@
         .title-black {
             color: #222;
             font-weight: 400;
+        }
+        .title.dark-mode, .title-black.dark-mode, .date.dark-mode, .day.dark-mode, .progress-label.dark-mode {
+            color: #f7c087 !important;
         }
         .date-section {
             margin-top: 18px;
@@ -44,15 +54,24 @@
             font-weight: bold;
             letter-spacing: 2px;
         }
+        .day.dark-mode {
+            color: #f7c087;
+        }
         .date {
             font-size: 1.6rem;
             font-weight: bold;
             color: #222;
         }
+        .date.dark-mode {
+            color: #f7c087;
+        }
         .progress-label {
             color: #b87c3b;
             font-size: 1rem;
             margin-top: 18px;
+        }
+        .progress-label.dark-mode {
+            color: #f7c087;
         }
         .progress-bar-bg {
             background: #f7e2c6;
@@ -62,11 +81,17 @@
             margin-top: 6px;
             margin-bottom: 18px;
         }
+        .progress-bar-bg.dark-mode {
+            background: #444;
+        }
         .progress-bar {
             background: #e67c1e;
             height: 6px;
             border-radius: 6px;
             width: 40%; /* Set dynamically with JS */
+        }
+        .progress-bar.dark-mode {
+            background: #f7c087;
         }
         .task-input-row {
             display: flex;
@@ -82,6 +107,10 @@
             color: #fff;
             font-size: 1.1rem;
         }
+        .task-input.dark-mode {
+            background: #333;
+            color: #fff;
+        }
         .add-btn {
             background: #f7e2c6;
             color: #b87c3b;
@@ -93,6 +122,14 @@
             transition: background 0.2s;
         }
         .add-btn:hover {
+            background: #e67c1e;
+            color: #fff;
+        }
+        .add-btn.dark-mode, .filter-btn.dark-mode {
+            background: #333;
+            color: #f7c087;
+        }
+        .add-btn.dark-mode:hover, .filter-btn.dark-mode.active, .filter-btn.dark-mode:hover {
             background: #e67c1e;
             color: #fff;
         }
@@ -114,6 +151,13 @@
             background: #e67c1e;
             color: #fff;
         }
+        .filter-btn.dark-mode {
+            background: #333;
+            color: #f7c087;
+        }
+        .filter-btn:hover {
+            color: #b87c3b;
+        }
         .tasks-list {
             list-style: none;
             padding: 0;
@@ -129,10 +173,27 @@
             justify-content: space-between;
             font-size: 1.1rem;
             box-shadow: 0 1px 2px rgba(0,0,0,0.03);
+            opacity: 0;
+            transform: translateY(20px) scale(0.98);
+            animation: fadeInTask 0.4s cubic-bezier(.4,1.7,.6,1) forwards;
+        }
+        .task-item.dark-mode {
+            background: #2d323b;
+            color: #fff;
+        }
+        .task-item.removing {
+            animation: fadeOutTask 0.3s cubic-bezier(.4,1.7,.6,1) forwards;
+        }
+        .task-title {
+            color: #222;
+            font-weight: bold;
         }
         .task-title.completed {
             text-decoration: line-through;
             color: #a0aec0;
+        }
+        .task-title.completed.dark-mode {
+            color: #555;
         }
         .task-actions button {
             background: none;
@@ -145,32 +206,79 @@
         .task-actions button:hover {
             color: #b87c3b;
         }
+        /* Animation for adding tasks */
+        .task-item {
+            opacity: 0;
+            transform: translateY(20px) scale(0.98);
+            animation: fadeInTask 0.4s cubic-bezier(.4,1.7,.6,1) forwards;
+        }
+        @keyframes fadeInTask {
+            to {
+                opacity: 1;
+                transform: translateY(0) scale(1);
+            }
+        }
+
+        /* Animation for deleting tasks */
+        .task-item.removing {
+            animation: fadeOutTask 0.3s cubic-bezier(.4,1.7,.6,1) forwards;
+        }
+        @keyframes fadeOutTask {
+            to {
+                opacity: 0;
+                transform: translateX(40px) scale(0.95);
+                height: 0;
+                margin-bottom: 0;
+                padding-top: 0;
+                padding-bottom: 0;
+            }
+        }
+
+        /* Progress bar animation */
+        .progress-bar {
+            transition: width 0.5s cubic-bezier(.4,1.7,.6,1);
+        }
+
+        /* Button hover animation */
+        .add-btn, .filter-btn, .task-actions button {
+            transition: background 0.2s, color 0.2s, transform 0.15s;
+        }
+        .add-btn:hover, .filter-btn:hover, .task-actions button:hover {
+            transform: scale(1.07);
+        }
     </style>
 </head>
 <body>
     <div class="header-bar"></div>
-    <div class="container">
-        <span class="title">Flow</span><span class="title title-black">Tasks</span>
+    <div class="container" id="container">
+        <span class="title" id="title-flow">Flow</span><span class="title title-black" id="title-tasks">Tasks</span>
+        <button id="dark-toggle" style="float:right; margin-top:10px; background:#e67c1e; color:#fff; border:none; border-radius:8px; padding:6px 16px; cursor:pointer;">🌙 Dark Mode</button>
         <div class="date-section">
             <div class="day" id="day"></div>
             <div class="date" id="date"></div>
         </div>
         <div class="progress-label" id="progress-label">Today's progress</div>
-        <div class="progress-bar-bg">
+        <div class="progress-bar-bg" id="progress-bar-bg">
             <div class="progress-bar" id="progress-bar"></div>
         </div>
         <form class="task-input-row" id="add-task-form" autocomplete="off">
             <input class="task-input" type="text" id="task-input" placeholder="Add a new task..." required>
+            <select id="category-input" style="border-radius:8px; padding:10px; border:none; background:#f7e2c6; color:#b87c3b; font-size:1.1rem;">
+                <option value="Work">Work</option>
+                <option value="Personal">Personal</option>
+                <option value="Health">Health</option>
+                <option value="Study">Study</option>
+            </select>
             <button class="add-btn" type="submit">Add</button>
         </form>
-        <div class="filter-row">
-            <button class="filter-btn active" type="button">All</button>
-            <button class="filter-btn" type="button">Active</button>
-            <button class="filter-btn" type="button">Done</button>
-            <button class="filter-btn" type="button">Work</button>
-            <button class="filter-btn" type="button">Personal</button>
-            <button class="filter-btn" type="button">Health</button>
-            <button class="filter-btn" type="button">Study</button>
+        <div class="filter-row" id="filter-row">
+            <button class="filter-btn active" type="button" data-filter="All">All</button>
+            <button class="filter-btn" type="button" data-filter="Active">Active</button>
+            <button class="filter-btn" type="button" data-filter="Done">Done</button>
+            <button class="filter-btn" type="button" data-filter="Work">Work</button>
+            <button class="filter-btn" type="button" data-filter="Personal">Personal</button>
+            <button class="filter-btn" type="button" data-filter="Health">Health</button>
+            <button class="filter-btn" type="button" data-filter="Study">Study</button>
         </div>
         <ul class="tasks-list" id="tasks-list">
             <!-- Tasks will be rendered here -->
@@ -183,35 +291,48 @@
         document.getElementById('day').textContent = days[now.getDay()];
         document.getElementById('date').textContent = now.toLocaleDateString('en-GB', { day: '2-digit', month: 'long', year: 'numeric' });
 
-        // Simple in-memory tasks for demo (replace with backend integration)
+        // Tasks with categories
         let tasks = [
-            {title: "Work", completed: true},
-            {title: "Personal", completed: false},
-            {title: "Health", completed: true},
-            {title: "Study", completed: false},
-            {title: "Read a book", completed: false}
+            {title: "Work", completed: true, category: "Work"},
+            {title: "Personal", completed: false, category: "Personal"},
+            {title: "Health", completed: true, category: "Health"},
+            {title: "Study", completed: false, category: "Study"},
+            {title: "Read a book", completed: false, category: "Personal"}
         ];
+
+        let currentFilter = "All";
 
         function renderTasks() {
             const list = document.getElementById('tasks-list');
             list.innerHTML = '';
             let completed = 0;
-            tasks.forEach((task, idx) => {
+            let filtered = tasks.filter(task => {
+                if (currentFilter === "All") return true;
+                if (currentFilter === "Active") return !task.completed;
+                if (currentFilter === "Done") return task.completed;
+                return task.category === currentFilter;
+            });
+            filtered.forEach((task, idx) => {
                 if (task.completed) completed++;
                 const li = document.createElement('li');
-                li.className = 'task-item';
+                li.className = 'task-item' + (document.body.classList.contains('dark-mode') ? ' dark-mode' : '');
                 li.innerHTML = `
-                    <span class="task-title${task.completed ? ' completed' : ''}">${task.title}</span>
+                    <span class="task-title${task.completed ? ' completed' : ''}${document.body.classList.contains('dark-mode') ? ' dark-mode' : ''}">
+                        ${task.title} <span style="font-size:0.9rem; color:#b87c3b; margin-left:10px;">[${task.category}]</span>
+                    </span>
                     <span class="task-actions">
-                        <button onclick="toggleComplete(${idx})">${task.completed ? 'Undo' : 'Done'}</button>
-                        <button onclick="deleteTask(${idx})">Delete</button>
+                        <button onclick="toggleComplete(${tasks.indexOf(task)})">${task.completed ? 'Undo' : 'Done'}</button>
+                        <button onclick="deleteTask(${tasks.indexOf(task)})">Delete</button>
                     </span>
                 `;
                 list.appendChild(li);
             });
             // Progress
-            document.getElementById('progress-label').textContent = `Today's progress    ${completed} / ${tasks.length} done`;
-            document.getElementById('progress-bar').style.width = (tasks.length ? (completed / tasks.length * 100) : 0) + "%";
+            document.getElementById('progress-label').textContent = `Today's progress    ${tasks.filter(t=>t.completed).length} / ${tasks.length} done`;
+            document.getElementById('progress-bar').style.width = (tasks.length ? (tasks.filter(t=>t.completed).length / tasks.length * 100) : 0) + "%";
+            // Dark mode for progress bar
+            document.getElementById('progress-bar').className = 'progress-bar' + (document.body.classList.contains('dark-mode') ? ' dark-mode' : '');
+            document.getElementById('progress-bar-bg').className = 'progress-bar-bg' + (document.body.classList.contains('dark-mode') ? ' dark-mode' : '');
         }
 
         function toggleComplete(idx) {
@@ -220,18 +341,55 @@
         }
 
         function deleteTask(idx) {
-            tasks.splice(idx, 1);
-            renderTasks();
+            const list = document.getElementById('tasks-list');
+            const li = list.children[idx];
+            if (li) {
+                li.classList.add('removing');
+                setTimeout(() => {
+                    tasks.splice(idx, 1);
+                    renderTasks();
+                }, 280);
+            } else {
+                tasks.splice(idx, 1);
+                renderTasks();
+            }
         }
 
         document.getElementById('add-task-form').addEventListener('submit', function(e) {
             e.preventDefault();
             const val = document.getElementById('task-input').value.trim();
+            const cat = document.getElementById('category-input').value;
             if (val) {
-                tasks.push({title: val, completed: false});
+                tasks.push({title: val, completed: false, category: cat});
                 document.getElementById('task-input').value = '';
                 renderTasks();
             }
+        });
+
+        // Filter buttons
+        document.querySelectorAll('.filter-btn').forEach(btn => {
+            btn.addEventListener('click', function() {
+                document.querySelectorAll('.filter-btn').forEach(b => b.classList.remove('active'));
+                this.classList.add('active');
+                currentFilter = this.getAttribute('data-filter');
+                renderTasks();
+            });
+        });
+
+        // Dark mode toggle
+        document.getElementById('dark-toggle').addEventListener('click', function() {
+            document.body.classList.toggle('dark-mode');
+            document.getElementById('container').classList.toggle('dark-mode');
+            document.getElementById('title-flow').classList.toggle('dark-mode');
+            document.getElementById('title-tasks').classList.toggle('dark-mode');
+            document.getElementById('day').classList.toggle('dark-mode');
+            document.getElementById('date').classList.toggle('dark-mode');
+            document.getElementById('progress-label').classList.toggle('dark-mode');
+            document.querySelectorAll('.task-input').forEach(el => el.classList.toggle('dark-mode'));
+            document.querySelectorAll('.add-btn').forEach(el => el.classList.toggle('dark-mode'));
+            document.querySelectorAll('.filter-btn').forEach(el => el.classList.toggle('dark-mode'));
+            renderTasks();
+            this.textContent = document.body.classList.contains('dark-mode') ? '☀️ Light Mode' : '🌙 Dark Mode';
         });
 
         renderTasks();
