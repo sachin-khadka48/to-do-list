@@ -263,7 +263,7 @@
         </div>
         <form class="task-input-row" id="add-task-form" autocomplete="off">
             <input class="task-input" type="text" id="task-input" placeholder="Add a new task..." required>
-            <select id="category-input" style="border-radius:8px; padding:10px; border:none; background:#f7e2c6; color:#b87c3b; font-size:1.1rem;">
+            <select id="category-input">
                 <option value="Work">Work</option>
                 <option value="Personal">Personal</option>
                 <option value="Health">Health</option>
@@ -272,6 +272,7 @@
             <button class="add-btn" type="submit">Add</button>
         </form>
         <!-- Search bar -->
+        <input class="task-input" type="text" id="search-input" placeholder="Search tasks..." style="margin-bottom:18px; width:100%; background:#fff; color:#222;">
         <input class="task-input" type="text" id="search-input" placeholder="Search tasks..." style="margin-bottom:18px; width:100%; background:#fff; color:#222;">
         <div class="filter-row" id="filter-row">
             <button class="filter-btn active" type="button" data-filter="All">All</button>
@@ -294,12 +295,13 @@
         document.getElementById('date').textContent = now.toLocaleDateString('en-GB', { day: '2-digit', month: 'long', year: 'numeric' });
 
         // Tasks with categories
+        let nextId = 1;
         let tasks = [
-            {title: "Work", completed: true, category: "Work"},
-            {title: "Personal", completed: false, category: "Personal"},
-            {title: "Health", completed: true, category: "Health"},
-            {title: "Study", completed: false, category: "Study"},
-            {title: "Read a book", completed: false, category: "Personal"}
+            {id: nextId++, title: "Work", completed: true, category: "Work"},
+            {id: nextId++, title: "Personal", completed: false, category: "Personal"},
+            {id: nextId++, title: "Health", completed: true, category: "Health"},
+            {id: nextId++, title: "Study", completed: false, category: "Study"},
+            {id: nextId++, title: "Read a book", completed: false, category: "Personal"}
         ];
 
         let currentFilter = "All";
@@ -322,13 +324,14 @@
                 if (task.completed) completed++;
                 const li = document.createElement('li');
                 li.className = 'task-item' + (document.body.classList.contains('dark-mode') ? ' dark-mode' : '');
+                li.dataset.id = task.id;
                 li.innerHTML = `
                     <span class="task-title${task.completed ? ' completed' : ''}${document.body.classList.contains('dark-mode') ? ' dark-mode' : ''}">
                         ${task.title} <span style="font-size:0.9rem; color:#b87c3b; margin-left:10px;">[${task.category}]</span>
                     </span>
                     <span class="task-actions">
-                        <button onclick="toggleComplete(${tasks.indexOf(task)})">${task.completed ? 'Undo' : 'Done'}</button>
-                        <button onclick="deleteTask(${tasks.indexOf(task)})">Delete</button>
+                        <button data-action="toggle">${task.completed ? 'Undo' : 'Done'}</button>
+                        <button data-action="delete">Delete</button>
                     </span>
                 `;
                 list.appendChild(li);
@@ -341,22 +344,24 @@
             document.getElementById('progress-bar-bg').className = 'progress-bar-bg' + (document.body.classList.contains('dark-mode') ? ' dark-mode' : '');
         }
 
-        function toggleComplete(idx) {
-            tasks[idx].completed = !tasks[idx].completed;
+        function toggleCompleteById(id) {
+            const task = tasks.find(t => t.id === id);
+            if (!task) return;
+            task.completed = !task.completed;
             renderTasks();
         }
 
-        function deleteTask(idx) {
+        function deleteTaskById(id) {
             const list = document.getElementById('tasks-list');
-            const li = list.children[idx];
+            const li = list.querySelector(`li[data-id="${id}"]`);
             if (li) {
                 li.classList.add('removing');
                 setTimeout(() => {
-                    tasks.splice(idx, 1);
+                    tasks = tasks.filter(t => t.id !== id);
                     renderTasks();
                 }, 280);
             } else {
-                tasks.splice(idx, 1);
+                tasks = tasks.filter(t => t.id !== id);
                 renderTasks();
             }
         }
@@ -366,7 +371,7 @@
             const val = document.getElementById('task-input').value.trim();
             const cat = document.getElementById('category-input').value;
             if (val) {
-                tasks.push({title: val, completed: false, category: cat});
+                tasks.push({id: nextId++, title: val, completed: false, category: cat});
                 document.getElementById('task-input').value = '';
                 renderTasks();
             }
@@ -394,6 +399,8 @@
             document.querySelectorAll('.task-input').forEach(el => el.classList.toggle('dark-mode'));
             document.querySelectorAll('.add-btn').forEach(el => el.classList.toggle('dark-mode'));
             document.querySelectorAll('.filter-btn').forEach(el => el.classList.toggle('dark-mode'));
+            document.getElementById('category-input').classList.toggle('dark-mode');
+            document.getElementById('search-input').classList.toggle('dark-mode');
             renderTasks();
             this.textContent = document.body.classList.contains('dark-mode') ? '☀️ Light Mode' : '🌙 Dark Mode';
         });
