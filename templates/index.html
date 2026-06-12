@@ -273,7 +273,6 @@
         </form>
         <!-- Search bar -->
         <input class="task-input" type="text" id="search-input" placeholder="Search tasks..." style="margin-bottom:18px; width:100%; background:#fff; color:#222;">
-        <input class="task-input" type="text" id="search-input" placeholder="Search tasks..." style="margin-bottom:18px; width:100%; background:#fff; color:#222;">
         <div class="filter-row" id="filter-row">
             <button class="filter-btn active" type="button" data-filter="All">All</button>
             <button class="filter-btn" type="button" data-filter="Active">Active</button>
@@ -297,10 +296,10 @@
         // Tasks with categories
         let nextId = 1;
         let tasks = [
-            {id: nextId++, title: "Work", completed: true, category: "Work"},
-            {id: nextId++, title: "Personal", completed: false, category: "Personal"},
-            {id: nextId++, title: "Health", completed: true, category: "Health"},
-            {id: nextId++, title: "Study", completed: false, category: "Study"},
+            {id: nextId++, title: "Finish project report", completed: true, category: "Work"},
+            {id: nextId++, title: "Call a friend", completed: false, category: "Personal"},
+            {id: nextId++, title: "Morning workout", completed: true, category: "Health"},
+            {id: nextId++, title: "Review lecture notes", completed: false, category: "Study"},
             {id: nextId++, title: "Read a book", completed: false, category: "Personal"}
         ];
 
@@ -403,6 +402,24 @@
             document.getElementById('search-input').classList.toggle('dark-mode');
             renderTasks();
             this.textContent = document.body.classList.contains('dark-mode') ? '☀️ Light Mode' : '🌙 Dark Mode';
+        });
+
+
+        // Task action delegation
+        document.getElementById('tasks-list').addEventListener('click', function(e) {
+            const btn = e.target.closest('button[data-action]');
+            if (!btn) return;
+            const li = btn.closest('li[data-id]');
+            if (!li) return;
+            const id = parseInt(li.dataset.id);
+            if (btn.dataset.action === 'toggle') toggleCompleteById(id);
+            if (btn.dataset.action === 'delete') deleteTaskById(id);
+        });
+
+        // Search
+        document.getElementById('search-input').addEventListener('input', function() {
+            searchQuery = this.value;
+            renderTasks();
         });
 
         renderTasks();
